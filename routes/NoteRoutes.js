@@ -1,76 +1,89 @@
 const noteModel = require("../models/NotesModel");
+const express = require("express");
+const router = express.Router();
+
+const app = express();
+app.use(express.json());
+app.use(router);
 //TODO - Create a new Note
 //http://mongoosejs.com/docs/api.html#document_Document-save
-app.post("/notes", (req, res) => {
+router.post("/notes", async (req, res) => {
     const data = req.body;
+    console.log(req.body);
     // Validate request
-    if (!req.body.content) {
+    if (!req.body) {
         return res.status(400).send({
             message: "Note content can not be empty",
         });
     }
     //TODO - Write your code here to save the note
-    noteModel.create(data);
+    await noteModel.create(data);
     res.status(201).json({ message: "Note created Successfully" });
 });
 
 //TODO - Retrieve all Notes
 //http://mongoosejs.com/docs/api.html#find_find
-app.get("/notes", (req, res) => {
+router.get("/notes", async (req, res) => {
     // Validate request
-    if (!req.body.content) {
-        return res.status(400).send({
-            message: "Note content can not be empty",
-        });
-    } else {
-    }
     //TODO - Write your code here to returns all note
-    const fetchNotes = noteModel.find();
-    res.status(200).json(fetchNotes);
+    try {
+        const fetchNotes = await noteModel.find();
+        res.status(200).json(fetchNotes);
+        console.log("Fetched all notes");
+    } catch (error) {
+        console.error("Error fetching note data");
+        return res.status(400).json({ message: "Internal Server Error" });
+    }
 });
 
 //TODO - Retrieve a single Note with noteId
 //http://mongoosejs.com/docs/api.html#findbyid_findById
-app.get("/notes/:noteId", (req, res) => {
-    const id = req.params.id;
-    const fetchNote = noteModel.findById(id);
-    // Validate request
-    if (!req.body.content) {
-        return res.status(400).send({
-            message: "Note content can not be empty",
-        });
+router.get("/notes/:noteId", async (req, res) => {
+    try {
+        const id = req.params.noteId;
+        const fetchNote = await noteModel.findById(id);
+        console.log(req.body);
+        if (fetchNote) {
+            res.status(200).json(fetchNote);
+        } else {
+            return res.status(400).send({
+                message: "Note content can not be empty",
+            });
+        }
+    } catch (error) {
+        console.error(error);
     }
-    //TODO - Write your code here to return onlt one note using noteid
-    res.status(200).json(fetchNote);
 });
 
 //TODO - Update a Note with noteId
 //http://mongoosejs.com/docs/api.html#findbyidandupdate_findByIdAndUpdate
-app.put("/notes/:noteId", (req, res) => {
-    const id = req.params.id;
+router.put("/notes/:noteId", async (req, res) => {
+    const id = req.params.noteId;
     const updatedData = req.body;
     // Validate request
-    if (!req.body.content) {
+    if (!req.body) {
         return res.status(400).send({
             message: "Note content can not be empty",
         });
     }
     //TODO - Write your code here to update the note using noteid
-    noteModel.findByIdAndUpdate(id, updatedData);
+    await noteModel.findByIdAndUpdate(id, updatedData);
     res.status(200).json({ message: "Note details updated successfully." });
 });
 
 //TODO - Delete a Note with noteId
 //http://mongoosejs.com/docs/api.html#findbyidandremove_findByIdAndRemove
-app.delete("/notes/:noteId", (req, res) => {
-    const id = req.params.id;
+router.delete("/notes/:noteId", async (req, res) => {
+    const id = req.params.noteId;
     // Validate request
-    if (!req.body.content) {
+    if (!req.body) {
         return res.status(400).send({
             message: "Note content can not be empty",
         });
     }
     //TODO - Write your code here to delete the note using noteid
-    noteModel.findByIdAndDelete(id);
+    await noteModel.findByIdAndDelete(id);
     res.status(200).json({ message: "Note deleted successfully." });
 });
+
+module.exports = router;

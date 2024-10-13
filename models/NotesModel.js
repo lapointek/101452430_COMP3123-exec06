@@ -18,8 +18,8 @@ const NoteSchema = mongoose.Schema(
     }
 );
 
-const note = mongoose.model("NotesModel", NoteSchema);
-module.exports = note;
+const Note = mongoose.model("NotesModel", NoteSchema);
+module.exports = Note;
 
 //TODO - Create Note Schema here having fields
 //      - noteTitle
